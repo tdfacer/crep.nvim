@@ -171,6 +171,48 @@ local temp_repos = {
 
 local _M = {}
 
+_M.clone_repo = function(opts)
+  print(string.format("cloning %s/%s", opts.organization, opts.repo))
+  -- Job:new({
+  --   command = 'gh',
+  --   args = { 'repo', 'list', _M.organization, '--json', 'name,description,pushedAt' },
+  --   on_exit = function(j, return_val)
+  --     if return_val > 0 then
+  --       print("failed to complete command with error code: " .. return_val)
+  --       return {}
+  --     else
+  --       print(vim.inspect(j:result()))
+  --     end
+  --
+  --     local result = j:result()
+  --
+  --     local ok, results = pcall(vim.json.decode, table.concat(result, ""))
+  --
+  --     if not ok then
+  --       print("was not ok. ok: " .. ok)
+  --     else
+  --       -- print("ok! ok: " .. ok)
+  --       string.format("ok!: ok: %s", ok)
+  --     end
+  --
+  --     if not results then
+  --       print("was not parsed. parsed: " .. results)
+  --     else
+  --       -- print("parsed! parsed: " .. parsed)
+  --       string.format("parsed! parsed: %parsed", results)
+  --     end
+  --
+  --     for _, v in pairs(results) do
+  --       -- print(string.format("parsed key: %s, val: %s", k, vim.inspect(v)))
+  --       -- print("name: " .. v.name)
+  --       -- print("description: " .. v.description)
+  --       -- print("pushedAt: " .. v.pushedAt)
+  --       table.insert(all_results, v)
+  --     end
+  --   end,
+  -- }):start() -- or start()
+end
+
 _M.setup = function(opts)
   -- print("in setup, ops.organization: " .. opts.organization)
   _M.organization = opts.organization and opts.organization or ""
@@ -216,7 +258,7 @@ local function gen_from_gh_repo_list(opts)
 end
 
 _M.get_repos = function(opts)
-  opts = opts or {}
+  opts = opts or _M.opts
   opts.cwd = utils.get_lazy_default(opts.cwd, vim.loop.cwd)
   opts.entry_maker = utils.get_lazy_default(
     opts.entry_maker,
@@ -287,7 +329,8 @@ _M.get_repos = function(opts)
         -- local desired_path = "~/code/" .. entry.name
         local path = Path:new { "/home/trevor/code", entry.name }
         if not path:exists() then
-          print(entry.name .. " does not exist")
+          print(entry.name .. " does not exist from org " .. _M.organization)
+          _M.clone_repo({ organization = _M.organization, repo = entry.name })
         else
           print(entry.name .. " exists")
         end
@@ -317,8 +360,9 @@ _M.get_repos = function(opts)
 end
 
 _M.setup({
+  organization = "tdfacer",
   -- organization = "",
-  organization = "ifit",
+  -- organization = "ifit",
 })
 -- _M.do_stuff()
 -- _M.get_repos()
