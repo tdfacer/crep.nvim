@@ -74,8 +74,10 @@ local function gen_from_gh_repo_list(opts)
   return function(result)
     return {
       display = make_display,
-      value = result.name,
-      name = result.name,
+      value = string.format("%s/%s", _M.destination_dir, result.name),
+      -- value = result.name,
+      -- name = result.name,
+      name = string.format("%s/%s", _M.destination_dir, result.name),
       ordinal = result.name,
       description = result.description,
       pushed_at = result.pushedAt,
