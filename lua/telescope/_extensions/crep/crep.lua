@@ -12,11 +12,44 @@ local pickers = require 'telescope.pickers'
 local previewers = require 'telescope.previewers.term_previewer'
 local utils = require 'telescope.utils'
 
+local defaulter = utils.make_default_callable
+
 -- name,description,pushedAt
 -- use this to get list of json fields:
 -- gh repo list --json 2>&1 | v -
 
 local _M = {}
+
+local counter = 0
+
+local gh_previewer = defaulter(function(opts)
+  opts = opts or {}
+
+  local maker = { "echo", "custom" }
+  -- local cwd = opts.cwd or vim.loop.cwd()
+
+  counter = counter + 1
+
+  return previewers.new_termopen_previewer {
+    title = "Custom Preview",
+    dyn_title = counter,
+    -- dyn_title = function(_, entry)
+    --   return Path:new(from_entry.path(entry, true)):normalize(cwd)
+    -- end,
+
+    get_command = function()
+      return maker
+    end
+    -- get_command = function(entry)
+    --   local p = from_entry.path(entry, true)
+    --   if p == nil or p == "" then
+    --     return
+    --   end
+    --
+    --   return maker(p)
+    -- end,
+  }
+end, {})
 
 -- _M.state = {
 --   organization = "",
@@ -76,8 +109,8 @@ local function gen_from_gh_repo_list(opts)
       display = make_display,
       value = string.format("%s/%s", _M.destination_dir, result.name),
       -- value = result.name,
-      -- name = result.name,
-      name = string.format("%s/%s", _M.destination_dir, result.name),
+      name = result.name,
+      -- name = string.format("%s/%s", _M.destination_dir, result.name),
       ordinal = result.name,
       description = result.description,
       pushed_at = result.pushedAt,
@@ -181,7 +214,8 @@ _M.get_repos = function(opts)
       entry_maker = opts.entry_maker,
     },
     sorter = conf.generic_sorter(),
-    previewer = previewers.cat.new(opts),
+    previewer = gh_previewer(opts),
+    -- previewer = previewers.cat.new(opts),
     -- previewer = previewers.vim_buffer_cat.new(opts),
     attach_mappings = function(prompt_bufnr)
       actions_set.select:replace(function(_, type)
