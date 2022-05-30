@@ -192,7 +192,7 @@ local function gen_from_gh_repo_list(opts)
   local function make_display(entry)
     return displayer {
       entry.name,
-      { '(' .. entry.description .. ')', 'TelescopeResultsIdentifier' },
+      { '(' .. entry.description or "default" .. ')', 'TelescopeResultsIdentifier' },
       { entry.pushed_at and '[' .. entry.pushed_at .. ']' or '', 'TelescopeResultsComment' },
       -- {'('..entry.version..')', 'TelescopeResultsIdentifier'},
       -- {entry.level and '['..entry.level..']' or '', 'TelescopeResultsComment'},
@@ -204,6 +204,7 @@ local function gen_from_gh_repo_list(opts)
       display = make_display,
       -- level = result.level,
       name = result.name,
+      ordinal = result.name,
       -- ordinal = result.json.name,
       -- path = result.dir,
       description = result.description,
@@ -221,7 +222,7 @@ _M.get_repos = function(opts)
     opts
   )
   local all_results = temp_repos
-  local format = gen_from_gh_repo_list()
+  -- local format = gen_from_gh_repo_list()
   -- local first = all_results[1]
   -- local check = format(first)
   -- vim.pretty_print(check)
@@ -269,15 +270,17 @@ _M.get_repos = function(opts)
   pickers.new(opts, {
     prompt_title = 'github repos',
     finder = finders.new_table {
+      -- results = { { name = "Trevor", description = "description", pushedAt = "something" } },
       results = all_results,
       entry_maker = opts.entry_maker,
     },
-    sorter = conf.generic_sorter(opts),
+    sorter = conf.generic_sorter(),
     previewer = previewers.cat.new(opts),
+    -- previewer = previewers.vim_buffer_cat.new(opts),
     attach_mappings = function(prompt_bufnr)
       actions_set.select:replace(function(_, type)
         local entry = actions_state.get_selected_entry()
-        print(entry)
+        print(entry.name)
         -- local dir = from_entry.path(entry)
         -- print(dir)
         -- if type == 'default' then
