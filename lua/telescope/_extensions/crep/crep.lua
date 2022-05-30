@@ -173,49 +173,29 @@ local _M = {}
 
 _M.clone_repo = function(opts)
   print(string.format("cloning %s/%s", opts.organization, opts.repo))
-  -- Job:new({
-  --   command = 'gh',
-  --   args = { 'repo', 'list', _M.organization, '--json', 'name,description,pushedAt' },
-  --   on_exit = function(j, return_val)
-  --     if return_val > 0 then
-  --       print("failed to complete command with error code: " .. return_val)
-  --       return {}
-  --     else
-  --       print(vim.inspect(j:result()))
-  --     end
-  --
-  --     local result = j:result()
-  --
-  --     local ok, results = pcall(vim.json.decode, table.concat(result, ""))
-  --
-  --     if not ok then
-  --       print("was not ok. ok: " .. ok)
-  --     else
-  --       -- print("ok! ok: " .. ok)
-  --       string.format("ok!: ok: %s", ok)
-  --     end
-  --
-  --     if not results then
-  --       print("was not parsed. parsed: " .. results)
-  --     else
-  --       -- print("parsed! parsed: " .. parsed)
-  --       string.format("parsed! parsed: %parsed", results)
-  --     end
-  --
-  --     for _, v in pairs(results) do
-  --       -- print(string.format("parsed key: %s, val: %s", k, vim.inspect(v)))
-  --       -- print("name: " .. v.name)
-  --       -- print("description: " .. v.description)
-  --       -- print("pushedAt: " .. v.pushedAt)
-  --       table.insert(all_results, v)
-  --     end
-  --   end,
-  -- }):start() -- or start()
+  -- gh repo clone ifit/lycan -- /tmp/lycan
+  Job:new({
+    command = 'gh',
+    args = { 'repo', 'clone', string.format("%s/%s", opts.organization, opts.repo), '--', string.format("%s/%s", _M.destination_dir, opts.repo) },
+    on_exit = function(_, return_val)
+      if return_val > 0 then
+        print("failed to clone: " .. opts.repo)
+        return {}
+      else
+        print("successfully cloned: " .. opts.repo)
+        return {}
+      end
+    end,
+    -- on_stderr = function(err)
+    --   print("err: " .. err)
+    -- end
+  }):start() -- or start()
 end
 
 _M.setup = function(opts)
   -- print("in setup, ops.organization: " .. opts.organization)
   _M.organization = opts.organization and opts.organization or ""
+  _M.destination_dir = "/home/trevor/code"
 end
 
 _M.do_stuff = function()
