@@ -12,9 +12,6 @@ local pickers = require 'telescope.pickers'
 local previewers = require 'telescope.previewers.term_previewer'
 local utils = require 'telescope.utils'
 
--- local organization = ""
--- local destination_dir = ""
-
 local temp_repos = {
   {
     description = "Quick start repository for creating a Terraform provider",
@@ -179,10 +176,6 @@ _M.state = {
   destination_dir = "/tmp"
 }
 
--- local function set_config_state(opt_name, value, default)
---   state[opt_name] = value == nil and default or value
--- end
-
 _M.clone_repo = function(opts)
   print(string.format("cloning %s/%s", opts.organization, opts.repo))
   -- gh repo clone ifit/lycan -- /tmp/lycan
@@ -199,21 +192,13 @@ _M.clone_repo = function(opts)
         return {}
       end
     end,
-    -- on_stderr = function(err)
-    --   print("err: " .. err)
-    -- end
   }):start() -- or start()
 end
 
 _M.setup = function(opts)
   vim.pretty_print(opts)
-  -- print("in setup, ops.organization: " .. opts.organization)
   _M.organization = opts.organization and opts.organization or ""
   _M.destination_dir = opts.destination_dir and opts.destination_dir or "/tmp/"
-end
-
-_M.do_stuff = function()
-  print("doing stuff!")
 end
 
 local function gen_from_gh_repo_list(opts)
@@ -240,11 +225,8 @@ local function gen_from_gh_repo_list(opts)
     return {
       display = make_display,
       value = result.name,
-      -- level = result.level,
       name = result.name,
       ordinal = result.name,
-      -- ordinal = result.json.name,
-      -- path = result.dir,
       description = result.description,
       pushed_at = result.pushedAt,
     }
@@ -359,14 +341,5 @@ _M.get_repos = function(opts)
     end,
   }):find()
 end
-
--- _M.setup({
---   organization = "tdfacer",
---   -- organization = "",
---   -- organization = "ifit",
--- })
-
--- _M.do_stuff()
--- _M.get_repos()
 
 return _M
