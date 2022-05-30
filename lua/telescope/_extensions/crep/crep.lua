@@ -204,6 +204,7 @@ _M.get_repos = function(opts)
         --   return
         -- end
         actions.close(prompt_bufnr)
+        vim.cmd('Telescope fd')
         -- if type == 'horizontal' then
         --   vim.cmd('cd ' .. dir)
         --   print('chdir to ' .. dir)
