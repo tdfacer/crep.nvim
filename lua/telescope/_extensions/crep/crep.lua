@@ -148,15 +148,17 @@ _M.get_repos = function(opts)
 
         -- save results to a json file
         -- local fh = io.open(_M.temp_file, "w")
-        local fh = io.open("/tmp/repo_list.json", "w")
-        if fh ~= nil then
-          fh:write(vim.json.encode(result))
-          fh:close()
-        end
         -- temp_file
 
         for _, v in pairs(results) do
           table.insert(all_results, v)
+        end
+
+        local fh = io.open("/tmp/repo_list.json", "w+")
+        if fh ~= nil then
+          fh:write(vim.json.encode(all_results))
+          -- fh:write(vim.json.encode(result))
+          fh:close()
         end
       end,
     }):sync(5000) -- or start()
