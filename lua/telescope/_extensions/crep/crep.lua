@@ -183,6 +183,7 @@ _M.clone_repo = function(opts)
         return {}
       else
         print("successfully cloned: " .. opts.repo)
+        vim.cmd('cd ' .. _M.destination_dir .. "/" .. opts.repo)
         return {}
       end
     end,
@@ -313,6 +314,7 @@ _M.get_repos = function(opts)
           _M.clone_repo({ organization = _M.organization, repo = entry.name })
         else
           print(entry.name .. " exists")
+          vim.cmd('cd ' .. _M.destination_dir .. "/" .. entry.name)
         end
         -- if not path:exists() then return nil end
         --       local exists = path:exists()
