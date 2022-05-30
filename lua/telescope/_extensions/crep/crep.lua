@@ -7,7 +7,7 @@ local conf = require 'telescope.config'.values
 local entry_display = require 'telescope.pickers.entry_display'
 local finders = require 'telescope.finders'
 local from_entry = require 'telescope.from_entry'
--- local Path = require("plenary.path")
+local Path = require("plenary.path")
 local pickers = require 'telescope.pickers'
 local previewers = require 'telescope.previewers.term_previewer'
 local utils = require 'telescope.utils'
@@ -173,7 +173,7 @@ local _M = {}
 
 _M.setup = function(opts)
   -- print("in setup, ops.organization: " .. opts.organization)
-  _M.organization = opts.organization or ""
+  _M.organization = opts.organization and opts.organization or ""
 end
 
 _M.do_stuff = function()
@@ -193,7 +193,7 @@ local function gen_from_gh_repo_list(opts)
   local function make_display(entry)
     return displayer {
       entry.name,
-      { '(' .. entry.description or "default" .. ')', 'TelescopeResultsIdentifier' },
+      { entry.description and '(' .. entry.description .. ')' or "default", 'TelescopeResultsIdentifier' },
       { entry.pushed_at and '[' .. entry.pushed_at .. ']' or '', 'TelescopeResultsComment' },
       -- {'('..entry.version..')', 'TelescopeResultsIdentifier'},
       -- {entry.level and '['..entry.level..']' or '', 'TelescopeResultsComment'},
@@ -282,7 +282,17 @@ _M.get_repos = function(opts)
     attach_mappings = function(prompt_bufnr)
       actions_set.select:replace(function(_, type)
         local entry = actions_state.get_selected_entry()
-        print(entry.name)
+
+        -- print(entry.name)
+        -- local desired_path = "~/code/" .. entry.name
+        local path = Path:new { "/home/trevor/code", entry.name }
+        if not path:exists() then
+          print(entry.name .. " does not exist")
+        else
+          print(entry.name .. " exists")
+        end
+        -- if not path:exists() then return nil end
+        --       local exists = path:exists()
         -- local dir = from_entry.path(entry)
         -- print(dir)
         -- if type == 'default' then
@@ -307,8 +317,8 @@ _M.get_repos = function(opts)
 end
 
 _M.setup({
-  organization = "",
-  -- organization = "ifit",
+  -- organization = "",
+  organization = "ifit",
 })
 -- _M.do_stuff()
 -- _M.get_repos()
