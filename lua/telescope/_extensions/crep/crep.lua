@@ -247,50 +247,51 @@ _M.get_repos = function(opts)
     gen_from_gh_repo_list,
     opts
   )
-  local all_results = temp_repos
+  -- local all_results = temp_repos
   -- local format = gen_from_gh_repo_list()
   -- local first = all_results[1]
   -- local check = format(first)
   -- vim.pretty_print(check)
 
-  -- local all_results = {}
-  -- Job:new({
-  --   command = 'gh',
-  --   args = { 'repo', 'list', _M.organization, '--json', 'name,description,pushedAt' },
-  --   on_exit = function(j, return_val)
-  --     if return_val > 0 then
-  --       print("failed to complete command with error code: " .. return_val)
-  --       return {}
-  --     else
-  --       print(vim.inspect(j:result()))
-  --     end
-  --
-  --     local result = j:result()
-  --
-  --     local ok, results = pcall(vim.json.decode, table.concat(result, ""))
-  --
-  --     if not ok then
-  --       print("was not ok. ok: " .. ok)
-  --     else
-  --       -- print("ok! ok: " .. ok)
-  --       string.format("ok!: ok: %s", ok)
-  --     end
-  --
-  --     if not results then
-  --       print("was not parsed. parsed: " .. results)
-  --     else
-  --       -- print("parsed! parsed: " .. parsed)
-  --       string.format("parsed! parsed: %parsed", results)
-  --     end
-  --
-  --     for _, v in pairs(results) do
-  --       -- print(string.format("parsed key: %s, val: %s", k, vim.inspect(v)))
-  --       -- print("name: " .. v.name)
-  --       -- print("description: " .. v.description)
-  --       -- print("pushedAt: " .. v.pushedAt)
-  --       table.insert(all_results, v)
-  --     end
-  --   end,
+  local all_results = {}
+  Job:new({
+    command = 'gh',
+    args = { 'repo', 'list', _M.organization, '--json', 'name,description,pushedAt' },
+    on_exit = function(j, return_val)
+      if return_val > 0 then
+        print("failed to complete command with error code: " .. return_val)
+        return {}
+        -- else
+        --   print(vim.inspect(j:result()))
+      end
+
+      local result = j:result()
+
+      local ok, results = pcall(vim.json.decode, table.concat(result, ""))
+
+      if not ok then
+        print("was not ok. ok: " .. ok)
+      else
+        -- print("ok! ok: " .. ok)
+        string.format("ok!: ok: %s", ok)
+      end
+
+      if not results then
+        print("was not parsed. parsed: " .. results)
+      else
+        -- print("parsed! parsed: " .. parsed)
+        string.format("parsed! parsed: %parsed", results)
+      end
+
+      for _, v in pairs(results) do
+        -- print(string.format("parsed key: %s, val: %s", k, vim.inspect(v)))
+        -- print("name: " .. v.name)
+        -- print("description: " .. v.description)
+        -- print("pushedAt: " .. v.pushedAt)
+        table.insert(all_results, v)
+      end
+    end,
+  }):sync() -- or start()
   -- }):start() -- or start()
 
   pickers.new(opts, {
