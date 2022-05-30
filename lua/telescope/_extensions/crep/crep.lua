@@ -118,11 +118,15 @@ _M.get_repos = function(opts)
     end
   end
 
+  print("refreshing repo list, please wait(0)...")
   if #all_results <= 0 then
     Job:new({
       command = 'gh',
-      args = { 'repo', 'list', _M.organization, '--json', 'name,description,pushedAt' },
+      args = { 'repo', 'list', _M.organization, "-L", "1000", '--json', 'name,description,pushedAt' },
       -- timeout = 30000,
+      on_start = function()
+        print("refreshing repo list, please wait(1)...")
+      end,
       on_exit = function(j, return_val)
         if return_val > 0 then
           print("failed to complete command with error code: " .. return_val)
@@ -161,7 +165,8 @@ _M.get_repos = function(opts)
           fh:close()
         end
       end,
-    }):sync(5000) -- or start()
+    }):sync(30000) -- or start()
+    print("refreshing repo list, please wait(2)...")
     -- }):sync(60000) -- or start()
   end
   -- }):start() -- or start()
