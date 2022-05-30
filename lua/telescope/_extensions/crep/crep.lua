@@ -172,6 +172,7 @@ local temp_repos = {
 local _M = {}
 
 _M.setup = function(opts)
+  -- print("in setup, ops.organization: " .. opts.organization)
   _M.organization = opts.organization or ""
 end
 
@@ -202,6 +203,7 @@ local function gen_from_gh_repo_list(opts)
   return function(result)
     return {
       display = make_display,
+      value = result.name,
       -- level = result.level,
       name = result.name,
       ordinal = result.name,
