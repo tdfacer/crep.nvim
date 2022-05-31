@@ -38,7 +38,7 @@ local gh_previewer = defaulter(function(opts)
     -- end,
 
     get_command = function()
-      return maker
+      return { "echo", "custom" }
     end
     -- get_command = function(entry)
     --   local p = from_entry.path(entry, true)
@@ -214,7 +214,7 @@ _M.get_repos = function(opts)
       entry_maker = opts.entry_maker,
     },
     sorter = conf.generic_sorter(),
-    previewer = gh_previewer(opts),
+    previewer = gh_previewer:new(opts),
     -- previewer = previewers.cat.new(opts),
     -- previewer = previewers.vim_buffer_cat.new(opts),
     attach_mappings = function(prompt_bufnr)
@@ -256,5 +256,10 @@ _M.get_repos = function(opts)
     end,
   }):find()
 end
+
+-- local things = gh_previewer:get_command()
+-- local things = gh_previewer:new().get_command
+-- local things = gh_previewer:new()
+-- vim.pretty_print(things)
 
 return _M
