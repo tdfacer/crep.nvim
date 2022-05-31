@@ -38,7 +38,7 @@ local gh_previewer = defaulter(function(opts)
   counter = counter + 1
 
   return previewers.new_termopen_previewer {
-    title = "Custom Preview",
+    title = _M.organization .. " repo",
     dyn_title = counter,
     -- dyn_title = function(_, entry)
     --   return Path:new(from_entry.path(entry, true))
