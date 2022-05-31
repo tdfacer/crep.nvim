@@ -23,7 +23,14 @@ local _M = {}
 local counter = 0
 
 local gh_previewer = defaulter(function(opts)
+
+  -- local from_entry = require "telescope.from_entry"
+  -- vim.pretty_print(entry)
+  vim.pretty_print(opts)
   opts = opts or {}
+
+  -- local thing = opts:new()
+  -- vim.pretty_print(thing)
 
   local maker = { "echo", "custom" }
   -- local cwd = opts.cwd or vim.loop.cwd()
@@ -34,11 +41,11 @@ local gh_previewer = defaulter(function(opts)
     title = "Custom Preview",
     dyn_title = counter,
     -- dyn_title = function(_, entry)
-    --   return Path:new(from_entry.path(entry, true)):normalize(cwd)
+    --   return Path:new(from_entry.path(entry, true))
     -- end,
 
-    get_command = function()
-      return { "echo", "custom" }
+    get_command = function(entry)
+      return { "echo", string.format("# %s", entry.name), string.format("\n\n* description: %s", entry.description), string.format("\n\n* pushed_at: %s", entry.pushed_at), string.format("\n\n* updated_at: %s", entry.updated_at), string.format("\n\n* pull_requests: %s", entry.pull_requests.totalCount) }
     end
     -- get_command = function(entry)
     --   local p = from_entry.path(entry, true)
@@ -114,6 +121,8 @@ local function gen_from_gh_repo_list(opts)
       ordinal = result.name,
       description = result.description,
       pushed_at = result.pushedAt,
+      updated_at = result.updatedAt,
+      pull_requests = result.pullRequests,
     }
   end
 end
@@ -157,7 +166,7 @@ _M.get_repos = function(opts)
   if #all_results <= 0 then
     Job:new({
       command = 'gh',
-      args = { 'repo', 'list', _M.organization, "-L", "1000", '--json', 'name,description,pushedAt' },
+      args = { 'repo', 'list', _M.organization, "-L", "1000", '--json', 'name,description,pushedAt,updatedAt,pullRequests' },
       -- timeout = 30000,
       on_start = function()
         print("refreshing repo list, please wait(1)...")
@@ -214,7 +223,8 @@ _M.get_repos = function(opts)
       entry_maker = opts.entry_maker,
     },
     sorter = conf.generic_sorter(),
-    previewer = gh_previewer:new(opts),
+    -- previewer = gh_previewer:new(opts),
+    previewer = gh_previewer:new(actions_state.get_selected_entry()),
     -- previewer = previewers.cat.new(opts),
     -- previewer = previewers.vim_buffer_cat.new(opts),
     attach_mappings = function(prompt_bufnr)
