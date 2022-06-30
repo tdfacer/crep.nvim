@@ -22,7 +22,9 @@ local gh_previewer = defaulter(function(opts)
     title = _M.organization .. " repo",
 
     get_command = function(entry)
-      return { "echo", string.format("# %s", entry.name), string.format("\n\n* description: %s", entry.description), string.format("\n\n* pushed_at: %s", entry.pushed_at), string.format("\n\n* updated_at: %s", entry.updated_at), string.format("\n\n* pull_requests: %s", entry.pull_requests.totalCount) }
+      return { "echo", string.format("# %s", entry.name), string.format("\n\n* description: %s", entry.description),
+        string.format("\n\n* pushed_at: %s", entry.pushed_at), string.format("\n\n* updated_at: %s", entry.updated_at),
+        string.format("\n\n* pull_requests: %s", entry.pull_requests.totalCount) }
     end
   }
 end, {})
@@ -30,7 +32,8 @@ end, {})
 _M.clone_repo = function(opts)
   Job:new({
     command = 'gh',
-    args = { 'repo', 'clone', string.format("%s/%s", opts.organization, opts.repo), '--', string.format("%s/%s", _M.destination_dir, opts.repo) },
+    args = { 'repo', 'clone', string.format("%s/%s", opts.organization, opts.repo), '--',
+      string.format("%s/%s", _M.destination_dir, opts.repo) },
     on_exit = function(_, return_val)
       if return_val > 0 then
         print("failed to clone: " .. opts.repo)
@@ -40,14 +43,16 @@ _M.clone_repo = function(opts)
         return {}
       end
     end,
-  }):sync()
+  }):sync(10000)
 end
 
 _M.setup = function(opts)
+  print("setup start:")
   vim.pretty_print(opts)
+  print("setup end:")
   _M.organization = opts.organization and opts.organization or ""
   _M.destination_dir = opts.destination_dir and opts.destination_dir or "/tmp/"
-  _M.temp_file = "/tmp/repo_list.json"
+  _M.temp_file = opts.temp_file and opts.temp_file or "/tmp/repo_list.json"
   return _M
 end
 
@@ -84,7 +89,19 @@ local function gen_from_gh_repo_list(opts)
 end
 
 _M.get_repos = function(opts)
-  opts = opts or _M.opts
+  print("_M: " .. vim.inspect(_M))
+  print("organization: " .. _M.organization)
+  print("opts: " .. vim.inspect(opts))
+  print("_M.opts: " .. vim.inspect(_M.opts))
+  -- opts = opts or _M.opts
+  -- opts = opts
+  local new_opts = _M.opts or {}
+  if opts ~= nil then
+    for k, _ in pairs(opts) do
+      new_opts[k] = opts[k]
+    end
+  end
+  print("new_opts: " .. vim.inspect(new_opts))
   opts.cwd = utils.get_lazy_default(opts.cwd, vim.loop.cwd)
   opts.entry_maker = utils.get_lazy_default(
     opts.entry_maker,
@@ -94,11 +111,11 @@ _M.get_repos = function(opts)
 
   local all_results = {}
 
-  local res_path = Path:new { "/tmp/repo_list.json" }
+  local res_path = Path:new { _M.temp_file }
   if not res_path:exists() then
     print("temp file does not exist yet at " .. _M.temp_file)
   else
-    local fh = io.open("/tmp/repo_list.json")
+    local fh = io.open(_M.temp_file)
     if fh ~= nil then
       all_results = vim.json.decode(fh:read("*a"))
     end
@@ -108,7 +125,8 @@ _M.get_repos = function(opts)
   if #all_results <= 0 then
     Job:new({
       command = 'gh',
-      args = { 'repo', 'list', _M.organization, "-L", "1000", '--json', 'name,description,pushedAt,updatedAt,pullRequests' },
+      args = { 'repo', 'list', _M.organization, "-L", "1000", '--json',
+        'name,description,pushedAt,updatedAt,pullRequests' },
       on_start = function()
         print("refreshing repo list, please wait(1)...")
       end,
@@ -126,7 +144,7 @@ _M.get_repos = function(opts)
           table.insert(all_results, v)
         end
 
-        local fh = io.open("/tmp/repo_list.json", "w+")
+        local fh = io.open(_M.temp_file, "w+")
         if fh ~= nil then
           fh:write(vim.json.encode(all_results))
           fh:close()
@@ -147,7 +165,7 @@ _M.get_repos = function(opts)
     attach_mappings = function(prompt_bufnr)
       actions_set.select:replace(function(_, type)
         local entry = actions_state.get_selected_entry()
-        local path = Path:new { "/home/trevor/code", entry.name }
+        local path = Path:new { _M.destination_dir, entry.name }
         if not path:exists() then
           print(entry.name .. " does not exist from org " .. _M.organization)
           _M.clone_repo({ organization = _M.organization, repo = entry.name })

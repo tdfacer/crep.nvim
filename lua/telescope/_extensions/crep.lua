@@ -8,5 +8,6 @@ return require 'telescope'.register_extension {
   end,
   exports = {
     get_repos = crep.get_repos,
+    setup = crep.setup,
   },
 }
