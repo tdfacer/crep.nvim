@@ -15,7 +15,7 @@ local defaulter = utils.make_default_callable
 local _M = {}
 
 local gh_previewer = defaulter(function(opts)
-  vim.pretty_print(opts)
+  vim.print(opts)
   opts = opts or {}
 
   return previewers.new_termopen_previewer {
@@ -48,7 +48,7 @@ end
 
 _M.setup = function(opts)
   print("setup start:")
-  vim.pretty_print(opts)
+  vim.print(opts)
   print("setup end:")
   _M.organization = opts.organization and opts.organization or ""
   _M.destination_dir = opts.destination_dir and opts.destination_dir or "/tmp/"
