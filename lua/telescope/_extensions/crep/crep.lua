@@ -121,7 +121,7 @@ _M.get_repos = function(opts)
     end
   end
 
-  print("refreshing repo list, please wait(0)...")
+  print("refreshing repo list, please wait for up to 60s(0)...")
   if #all_results <= 0 then
     Job:new({
       command = 'gh',
@@ -150,7 +150,7 @@ _M.get_repos = function(opts)
           fh:close()
         end
       end,
-    }):sync(30000) -- or start()
+    }):sync(60000) -- or start()
     print("refreshing repo list, please wait(2)...")
   end
 
